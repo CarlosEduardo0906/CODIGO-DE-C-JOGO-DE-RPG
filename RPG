@@ -1,0 +1,332 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <locale.h>
+
+typedef struct Item {
+    char nome[50];
+    int poder;
+    struct Item *prox;
+    struct Item *ant;
+} Item;
+
+
+// Definição da estrutura Personagem
+typedef struct Personagem {
+    char nome[50];
+    int nivel;
+    int vida;
+    Item *itens;
+    struct Personagem *prox;
+} Personagem;
+
+
+
+// Função para criar um novo personagem
+Personagem *novo_personagem(char nome[50], int nivel, int vida) {
+    Personagem *novo = (Personagem*) malloc(sizeof(Personagem));
+    strcpy(novo->nome, nome);
+    novo->nivel = nivel;
+    novo->vida = vida;
+    novo->itens = NULL;
+    novo->prox = NULL;
+    return novo;
+}
+
+// Função para inserir um personagem no final da lista
+void insere_personagem(Personagem **inicio, char nome[50], int nivel, int vida) {
+    Personagem *novo = novo_personagem(nome, nivel, vida);
+    if (*inicio == NULL) {
+        *inicio = novo;
+    } else {
+        Personagem *atual = *inicio;
+        while (atual->prox != NULL) {
+            atual = atual->prox;
+        }
+        atual->prox = novo;
+    }
+}
+
+
+
+// Função para remover um personagem da lista
+void remove_personagem(Personagem **inicio, char nome[50]) {
+    Personagem *atual = *inicio;
+    while (atual != NULL && strcmp(atual->nome, nome) != 0) {
+        atual = atual->prox;
+    }
+    if (atual == NULL) {
+        printf("Personagem nao encontrado.\n");
+    } else if (atual->itens != NULL) {
+        printf("Nao e possivel remover um personagem com itens equipados.\n");
+    } else if (atual->prox == NULL) {
+        Personagem *anterior = *inicio;
+        while (anterior->prox != atual) {
+            anterior = anterior->prox;
+        }
+        anterior->prox = NULL;
+        free(atual);
+    } else {
+        atual->nome[0] = '\0';
+        atual->nivel = 0;
+        atual->vida = 0;
+        free(atual->itens);
+        atual->itens = NULL;
+    }
+}
+
+// Função para imprimir todos os personagens da lista
+void imprime_personagens(Personagem *inicio) {
+    if (inicio == NULL) {
+        printf("Nao ha personagens cadastrados.\n");
+    } else {
+        printf("Lista de personagens:\n");
+        Personagem *atual = inicio;
+        while (atual != NULL) {
+            printf("%s (nivel %d, vida %d)\n", atual->nome, atual->nivel, atual->vida);
+            //imprime_itens(atual->itens);
+            atual = atual->prox;
+        }
+    }
+    printf("===========\n");
+}
+
+
+// Definindo a estrutura de um no da arvore
+typedef struct node {
+    int data;
+    char* item;
+    char* enemy;
+    struct node *norte;
+    struct node *sul;
+    struct node *leste;
+    struct node *oeste;
+} node;
+
+// Funcao para criar um novo no
+node *create_node(int data, char* item, char* enemy) {
+    node *new_node = (node *)malloc(sizeof(node));
+    new_node->data = data;
+    new_node->item = item;
+    new_node->enemy = enemy;
+    new_node->norte = NULL;
+    new_node->sul = NULL;
+    new_node->leste = NULL;
+    new_node->oeste = NULL;
+    return new_node;
+}
+
+// Funcao para criar a arvore com um mapa 5 x 5
+node *create_map() {
+    setlocale(LC_ALL, "pt_BR.UTF-8"); // Definindo a localidade para portugues do Brasil
+    node *root = create_node(1, NULL, NULL);
+    node *n2 = create_node(2, "pocao de cura", NULL);
+    node *n3 = create_node(3, NULL, "goblin");
+    node *n4 = create_node(4, NULL, NULL);
+    node *n5 = create_node(5, "espada de aco", NULL);
+    node *n6 = create_node(6, NULL, NULL);
+    node *n7 = create_node(7, "adaga envenenada", NULL);
+    node *n8 = create_node(8, NULL, "esqueleto");
+    node *n9 = create_node(9, "escudo de madeira", NULL);
+    node *n10 = create_node(10, NULL, NULL);
+    node *n11 = create_node(11, NULL, "orc");
+    node *n12 = create_node(12, "arco e flecha", NULL);
+    node *n13 = create_node(13, "livro de feiticos", NULL);
+    node *n14 = create_node(14, NULL, NULL);
+    node *n15 = create_node(15, NULL, NULL);
+
+    // Definindo as conexoes entre os nos da arvore
+    root->norte = n2;
+    root->leste = n3;
+
+    n2->sul = root;
+    n2->norte = n5;
+    n2->leste = n4;
+    n2->item = "machado de guerra";
+
+    n3->oeste = root;
+    n3->norte = n6;
+    n3->leste = n7;
+
+    n4->oeste = n2;
+    n4->norte = n8;
+    n4->item = "adaga de prata";
+
+    n5->sul = n2;
+    n5->leste = n6;
+    n5->enemy = "lobisomem";
+
+    n6->sul = n3;
+    n6->oeste = n5;
+    n6->item = "lanca de ferro";
+
+    n7->oeste = n3;
+    n7->norte = n10;
+    n7->leste = n8;
+    n7->enemy = "aranha gigante";
+
+    n8->oeste = n7;
+    n8->sul = n4;
+    n8->leste = n9;
+
+    n9->oeste = n8;
+    n9->norte = n12;
+    n9->item = "cota de malha";
+
+    n10->sul= n7;
+n10->leste = n11;
+n10->enemy = "zumbi";
+
+n11->oeste = n10;
+n11->sul = n14;
+n11->item = "escudo de ferro";
+
+n12->sul = n9;
+n12->leste = n13;
+n12->item = "amuleto da sorte";
+
+n13->oeste = n12;
+n13->norte = n14;
+n13->leste = n15;
+n13->item = "varinha magica";
+
+n14->norte = n11;
+n14->sul = n13;
+n14->enemy = "troll";
+
+n15->oeste = n13;
+n15->item = "armadura de ouro";
+
+return root;
+}
+
+// Funcao para imprimir o mapa
+void print_map(node *current) {
+
+setlocale(LC_ALL, "pt_BR.UTF-8"); // Definindo a localidade para portugues do Brasil
+
+printf("Voce esta na area %d.\n", current->data);
+if (current->item != NULL) {
+    printf("Voce encontrou um item: %s.\n", current->item);
+}
+
+if (current->enemy != NULL) {
+    printf("Voce encontrou um inimigo: %s.\n", current->enemy);
+}
+
+if (current->norte != NULL) {
+    printf("Ao norte ha a area %d.\n", current->norte->data);
+} else {
+    printf("Nao ha caminho ao norte.\n");
+}
+
+if (current->sul != NULL) {
+    printf("Ao sul ha a area %d.\n", current->sul->data);
+} else {
+    printf("Nao ha caminho ao sul.\n");
+}
+
+if (current->leste != NULL) {
+    printf("Ao leste ha a area %d.\n", current->leste->data);
+} else {
+    printf("Nao ha caminho ao leste.\n");
+}
+
+if (current->oeste != NULL) {
+    printf("Ao oeste ha a area %d.\n", current->oeste->data);
+} else {
+    printf("Nao ha caminho ao oeste.\n");
+}
+}
+int main() {
+    
+    setlocale(LC_ALL, "pt_BR.UTF-8"); // Definindo a localidade para portugues do Brasil
+    
+    node *current;
+    node *map = create_map();
+    int choice;
+
+    // Comecando na area inicial (raiz da arvore)
+    current = map;
+
+    // Loop principal do jogo
+    while (1) {
+        // Imprimindo informacoes sobre a area atual
+        print_map(current);
+
+        setlocale(LC_ALL, "pt_BR.UTF-8"); // Definindo a localidade para portugues do Brasil
+
+        // Verificando se ha itens ou inimigos na area atual
+        if (current->item != NULL) {
+            printf("Deseja pegar o item? Digite 1 para sim ou 0 para nao.\n");
+            scanf("%d", &choice);
+
+            if (choice == 1) {
+                printf("Voce pegou o item %s!\n", current->item);
+                // Removendo o item da area atual
+                current->item = NULL;
+            }
+        }
+
+        if (current->enemy != NULL) {
+            printf("Voce encontrou um inimigo! Deseja lutar? Digite 1 para sim ou 0 para nao.\n");
+            scanf("%d", &choice);
+
+            if (choice == 1) {
+                printf("Voce derrotou o inimigo %s!\n", current->enemy);
+                // Removendo o inimigo da area atual
+                current->enemy = NULL;
+            } else {
+                printf("Voce fugiu do inimigo %s!\n", current->enemy);
+            }
+        }
+
+        // Verificando se ha caminhos disponíveis na area atual
+        if (current->norte != NULL) {
+            printf("Digite 1 para ir ao norte (area %d).\n", current->norte->data);
+        }
+
+        if (current->sul != NULL) {
+            printf("Digite 2 para ir ao sul (area %d).\n", current->sul->data);
+        }
+
+        if (current->leste != NULL) {
+            printf("Digite 3 para ir ao leste (area %d).\n", current->leste->data);
+        }
+
+        if (current->oeste != NULL) {
+            printf("Digite 4 para ir ao oeste (area %d).\n", current->oeste->data);
+        }
+
+        // Recebendo a escolha do jogador
+        scanf("%d", &choice);
+
+        // Movendo o jogador para a area escolhida
+        switch (choice) {
+            case 1:
+                if (current->norte != NULL) {
+                    current = current->norte;
+                }
+                break;
+            case 2:
+                if (current->sul != NULL) {
+                    current = current->sul;
+                }
+                break;
+            case 3:
+                if (current->leste != NULL) {
+                    current = current->leste;
+                }
+                break;
+            case 4:
+                if (current->oeste != NULL) {
+                    current = current->oeste;
+                }
+                break;
+            default:
+                printf("Escolha invalida!\n");
+        }
+    }
+    getchar();
+    return 0;
+}
